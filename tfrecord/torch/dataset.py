@@ -71,6 +71,20 @@ class TFRecordDataset(torch.utils.data.IterableDataset):
         self.transform = transform or (lambda x: x)
         self.compression_type = compression_type
 
+        if self.index_pattern is not None:
+            self.num_samples = sum(
+                sum(1 for _ in open(self.index_pattern.format(split)))
+                for split in self.splits
+            )
+        else:
+            self.num_samples = None
+
+    def __len__(self):
+        if self.num_samples is not None:
+            return self.num_samples
+        else:
+            raise NotImplementedError()
+
     def __iter__(self):
         worker_info = torch.utils.data.get_worker_info()
         if worker_info is not None:
@@ -161,6 +175,20 @@ class MultiTFRecordDataset(torch.utils.data.IterableDataset):
         self.transform = transform
         self.compression_type = compression_type
         self.infinite = infinite
+
+        if self.index_pattern is not None:
+            self.num_samples = sum(
+                sum(1 for _ in open(self.index_pattern.format(split)))
+                for split in self.splits
+            )
+        else:
+            self.num_samples = None
+
+    def __len__(self):
+        if self.num_samples is not None:
+            return self.num_samples
+        else:
+            raise NotImplementedError()
 
     def __iter__(self):
         worker_info = torch.utils.data.get_worker_info()
